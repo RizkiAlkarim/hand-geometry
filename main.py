@@ -5,12 +5,10 @@ def convert_to_grayscale(rgb_weight, image):
     image = np.dot(image[..., :3], rgb_weight)
     return image
 
-def gaussian_filter(image):
-
 
 def main():
     image = plt.imread("./img/hand_1.jpg")
-    rgb_weight = [0.2989, 0.5870, 0.1140]
+    rgb_weight = [0.21, 0.72, 0.07]
     image = convert_to_grayscale(rgb_weight, image)
 
     plt.axis("off")

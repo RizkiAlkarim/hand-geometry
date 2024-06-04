@@ -128,7 +128,7 @@ def DecideAndConnectEdge(g_l,g_t,threshold = None):
                     if not (g_l[i, j] > first and g_l[i, j] > second):
                         isLocalExtreme = False
             if isLocalExtreme:
-                result[i,j] = g_l[i,j]       #非极大值抑制
+                result[i,j] = g_l[i,j]
 
     result[result>=threshold[1]] = 255
     result[result<=threshold[0]] = 0
@@ -141,6 +141,32 @@ def DecideAndConnectEdge(g_l,g_t,threshold = None):
 def OneDimensionStandardNormalDistribution(x,sigma):
     E = -0.5/(sigma*sigma)
     return 1/(math.sqrt(2*math.pi)*sigma)*math.exp(x*x*E)
+
+def find_edge_keypoints(image):
+
+    rows, cols = image.shape
+    keypoints = np.zeros((9, 2), dtype=float)  # Pre-allocate array for keypoints
+    p = 0
+    peak = False
+    valley = True
+
+    for row in range(rows):
+        for col in range(cols):
+            if p < 9:
+                if image[row, col] == 255 and keypoints[p-1][0] != row:
+                    if peak == False:
+                        keypoints[p] = [row, col]
+                        peak = True
+                        p += 1
+                        valley = False
+                    elif valley == False:
+                        keypoints[p] = [row, col]
+                        peak = False
+                        p += 1
+                        valley = True
+
+    return keypoints
+
 
 if __name__ == '__main__':
 
@@ -164,12 +190,12 @@ if __name__ == '__main__':
     for i in pics:
         if i[-4:] == '.png'or i[-4:] == '.jpg' or i[-5:] == '.jpeg':
             filename = pic_path + i
-            img = plt.imread(filename)
+            oriImg = plt.imread(filename)
             if i[-4:] == '.png':
-                img = img*255
-            img = img.mean(axis=-1)  #this is a way to get a gray image.
+                oriImg = oriImg*255
+            img = oriImg.mean(axis=-1)  #this is a way to get a gray image.
 
-            sigma = 1.52
+            sigma = 17
             dim = int(np.round(6*sigma+1))
             if dim % 2 == 0:
                 dim += 1
@@ -177,8 +203,6 @@ if __name__ == '__main__':
 
             linear_Gaussian_filter = np.array([[OneDimensionStandardNormalDistribution(t,sigma) for t in linear_Gaussian_filter]])
             linear_Gaussian_filter = linear_Gaussian_filter/linear_Gaussian_filter.sum()
-
-
 
             img2 = _2_dim_divided_convolve(linear_Gaussian_filter,img)
             # img2 = convolve(Gaussian_filter_5, img, [2, 2, 2, 2], [1, 1])
@@ -203,6 +227,49 @@ if __name__ == '__main__':
 
             #lower_boundary = 50
             final_img = DecideAndConnectEdge(gradiant_length,gradiant_tangent)
+            plt.axis('off')
+            print('final_img: ', final_img)
+            final_img = final_img[1:1119, 1:1726]
+            print('final_img: ', final_img)
 
-            cv2.imshow('edge',final_img.astype(np.uint8))
+            plt.imshow(final_img.astype(np.uint8), cmap='gray')
+            # plt.axis('off')
+            plt.show()
+            # cv2.imshow('edge',final_img.astype(np.uint8))
+
+            keypoints = find_edge_keypoints(final_img)
+            rows, cols = keypoints.shape
+            # for i in range(rows):
+            #     print("element ke-", i)
+            #     print(keypoints[i][0])
+            #     print(keypoints[i][1])
+            # rows, cols = keypoints.shape
+            # for row in range(rows):
+            #     for col in range(cols):
+            #         print(keypoints[row])
+            # print(keypoints)
+            
+            # key_points = [
+            #     cv2.KeyPoint(1, 1, 1.),
+            #     cv2.KeyPoint(8, 2, 1.),
+            #     cv2.KeyPoint(2, 8, 1.),
+            #     cv2.KeyPoint(1, 10, 1.),
+            #     cv2.KeyPoint(1723, 11, 1.),
+            #     cv2.KeyPoint(860, 60, 1.),
+            #     cv2.KeyPoint(861, 61, 1.),
+            #     cv2.KeyPoint(861, 62, 1.),
+            #     cv2.KeyPoint(861, 63, 1.),
+            # ]
+            # print(key_points)
+
+            # orb = cv2.ORB_create()
+            # kp = orb.detect(oriImg, None)
+            # kp, des = orb.compute(oriImg, kp)
+            # copy = cv2.drawKeypoints(oriImg, None, color=(0,255,0), flags=0, outImage=None)
+            # plt.imshow(copy)
+            # plt.show()
+            # cv2.imshow("image", copy.astype(np.uint8))
+            # plt.imshow(final_img.astype(np.uint8), cmap='gray')
+            # plt.show()
+
             cv2.waitKey(0)
