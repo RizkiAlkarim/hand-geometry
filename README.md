@@ -1,7 +1,5 @@
 # Hand Geometry
 
----
-
 # Getting Started
 
 Clone this repository with the following command:
