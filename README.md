@@ -1,5 +1,7 @@
 # Hand Geometry
 
+A hand geometry detection with Python using thresholding, masking, canny edge detection, convex hull, and convexity defect to calculate Manhattan and Euclidean distance for each finger to the hand valley
+
 # Getting Started
 
 Clone this repository with the following command:

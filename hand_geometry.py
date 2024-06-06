@@ -189,17 +189,45 @@ if __name__ == '__main__':
             plt.show()
 
             # Thresholding
-            ret, thresh = cv2.threshold(img, 90, 255, cv2.THRESH_BINARY)
-            kernel = np.ones((5,5),np.uint8)
-            thresh = cv2.erode(thresh, kernel, iterations=1)
-            thresh = cv2.dilate(thresh, kernel, iterations=1)
-            plt.imshow(thresh.astype(np.uint8), cmap='gray')
+            threshold = 100
+            binary = np.zeros_like(gaussian_img)
+            binary[gaussian_img > threshold] = 255
+            plt.imshow(binary.astype(np.uint8), cmap='gray')
             plt.axis('off')
-            plt.title("Threshold")
+            plt.title("Thresholding")
             plt.show()
 
+            # Erode Morphology Transformation
+            # kernel = np.ones((5, 5), np.uint8)
+            # thresh = np.zeros_like(binary)
+            # for i in range(2, binary.shape[0] - 2):
+            #     for j in range(2, binary.shape[1] - 2):
+            #         if np.all(binary[i - 2:i + 3, j - 2:j + 3] == 255):
+            #             thresh[i, j] = 255
+            # plt.imshow(thresh.astype(np.uint8), cmap='gray')
+            # plt.axis('off')
+            # plt.title("Erode")
+            # plt.show()
+
+            # Dilate Morphology Transformation
+            # thresh = np.zeros_like(binary)
+            # for i in range(2, binary.shape[0] - 2):
+            #     for j in range(2, binary.shape[1] - 2):
+            #         if np.any(binary[i - 2:i + 3, j - 2:j + 3] == 255):
+            #             thresh[i, j] = 255
+            # plt.imshow(thresh.astype(np.uint8), cmap='gray')
+            # plt.axis('off')
+            # plt.title("Dilate")
+            # plt.show()
+
             # Masking
-            masked = cv2.bitwise_and(img, img, mask=thresh)
+            mask = np.zeros_like(img)
+            mask[img > threshold] = 255
+            masked = np.zeros_like(img)
+            for i in range(mask.shape[0]):
+                for j in range(mask.shape[1]):
+                    if mask[i, j] == 255:
+                        masked[i, j] = img[i, j]
             plt.imshow(masked.astype(np.uint8), cmap='gray')
             plt.axis('off')
             plt.title("Masking")
@@ -213,18 +241,16 @@ if __name__ == '__main__':
             sobel_y = sobel_y.astype(np.float64)
             sobel_x[sobel_x==0]=0.00000001
             gradiant_tangent = sobel_y/sobel_x
-
-            #Hysteresis
             plt.imshow(gradiant_length.astype(np.uint8), cmap='gray')
             plt.axis('off')
-            plt.title("Hysteresis")
+            plt.title("Sobel Filter")
             plt.show()
 
-            # Non-Maximum Supression
+            # Hyteresis
             final_img = non_maximum_supression(gradiant_length,gradiant_tangent)
             plt.imshow(final_img.astype(np.uint8), cmap='gray')
             plt.axis('off')
-            plt.title("Non-Maximum Supression")
+            plt.title("Hysteresis")
             plt.show()
 
             # Contour
@@ -322,15 +348,15 @@ if __name__ == '__main__':
             pinky_manhattan = manhattan[8:15:2]
             ring_manhattan = manhattan[9:16:2]
             middle_manhattan = manhattan[0:4]
-            leading_manhattan = manhattan[4:8]
+            index_manhattan = manhattan[4:8]
             thumb_manhattan = manhattan[16:21]
-            manhattan_distance = [pinky_manhattan, ring_manhattan, middle_manhattan, leading_manhattan, thumb_manhattan]
+            manhattan_distance = [pinky_manhattan, ring_manhattan, middle_manhattan, index_manhattan, thumb_manhattan]
             print(f"manhattan_distance: {manhattan_distance}")
 
             pinky_euclidean = euclidean[8:15:2]
             ring_euclidean = euclidean[9:16:2]
             middle_euclidean = euclidean[0:4]
-            leading_euclidean = euclidean[4:8]
+            index_euclidean = euclidean[4:8]
             thumb_euclidean = euclidean[16:21]
-            euclidean_distance = [pinky_euclidean, ring_euclidean, middle_euclidean, leading_euclidean, thumb_euclidean]
+            euclidean_distance = [pinky_euclidean, ring_euclidean, middle_euclidean, index_euclidean, thumb_euclidean]
             print(f"euclidean_distance: {euclidean_distance}")
